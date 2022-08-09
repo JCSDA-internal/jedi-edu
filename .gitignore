@@ -1,4 +1,12 @@
-notebooks/.ipynb_checkpoints/
-notebooks/.ipython/
-notebooks/.jupyter/
-notebooks/.local/
+# This file tells git that it should not track certain files.
+
+*.swp
+*~
+*.DS_Store
+
+*.ipynb_checkpoints
+*.ipython
+*.jupyter
+*.local
+
+*.viminfo

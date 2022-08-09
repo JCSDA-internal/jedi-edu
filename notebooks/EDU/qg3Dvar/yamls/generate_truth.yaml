@@ -1,0 +1,19 @@
+forecast length: P1D                           # Run truth model for 18 days
+geometry:                                       # Declare the geometry of the model grid points
+  nx: 40                                        # number of grid points in zonal direction
+  ny: 20                                        # number of grid points in the meridional direction
+  depths: [4000.0, 6000.0]                      # Height of 1st and 2nd layer
+initial condition:                              # Declare details of initial condition
+  date: 2009-12-15T00:00:00Z                    # Date of initial condition
+  read_from_file: 0                             # Initial condition not read from file but internally generated
+model:                                          # Declare model used
+  name: QG                                      # Quasi-geostrophic model
+  tstep: PT10M                                  # Time step is 10 min
+output:                                         # Declare output
+  datadir: /home/jedi/EDU/qg3Dvar/output/truth/ # Directory where output file will be stored
+  date: 2009-12-15T00:00:00Z                    # Date of output file
+  exp: truth                                    # Experiment to generate truth file
+  frequency: PT6H                               # Output frequency is every 6 hours
+  type: fc                                      # Truth comes from running qg model in forecast mode
+prints:                                         # Declare output specifics
+  frequency: PT3H                               # Generate output every 3 hours
