@@ -1,0 +1,10 @@
+#!/bin/bash -l
+
+echo -e "check start"
+exec jupyter lab --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password='' &> /tmp/jupyter_runlog.txt &
+echo -e "\nWelcome to JEDI Tutorial!  To connect, open your browser to:\n\t localhost:<port>"
+echo -e "\nNOTE: Replace '<port>' with the port you specified in your 'docker run' command. For example, if you used the option:"
+echo -e "\t        -p 9999:8888 "
+echo -e "\nThen you should open the browser and go to:"
+echo -e "\t localhost:9999\n\n"
+wait
