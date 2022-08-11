@@ -39,6 +39,9 @@ All that follows is done **in the container ON THE WEBPAGE you just opened**.
 
 ### Clone and build oops-bundle
 In the launcher sub-window, click on `terminal`.
+
+![welcome](img/welcome.png)
+
 Enter the following commands in your web terminal:
 ```
 cd EDU
@@ -51,5 +54,8 @@ You should not need the terminal sub-window after this.
 
 ### Open the qg 3dvar tutorial
 On the left of the web page there is a tree of files, click on the little folder icon if you aren't on it already, and double click on `qg3Dvar_tutorial.ipynb`.
+
+Note that in this file, you will be able to run commands by clicking on the cell that contains it and click the `play` button.
+![welcome](img/run_command.png)
 
 ### Follow the tutorial instructions!
