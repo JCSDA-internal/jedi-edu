@@ -8,5 +8,8 @@
 *.ipython
 *.jupyter
 *.local
-
 *.viminfo
+
+*.cache
+*.config
+*.bash_history
