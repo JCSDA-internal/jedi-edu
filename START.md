@@ -15,6 +15,7 @@ git clone https://github.com/JCSDA-internal/jedi-edu.git
 ```
 Checkout the qg_tutorial branch:
 ```
+cd jedi-edu
 git checkout qg_tutorial
 ```
 
