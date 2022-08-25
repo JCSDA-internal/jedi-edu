@@ -21,7 +21,7 @@ git checkout qg_tutorial
 
 ### Build and enter the container
 ```
-cd jedi-edu/containers
+cd container
 docker build -t educontainer --build-arg=Dockerfile .
 docker run -it --rm -p 9999:8888 -v <your>/<path>/<to>/jedi-edu/notebooks/:/home/jedi/ educontainer
 ```
