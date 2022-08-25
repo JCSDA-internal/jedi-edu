@@ -9,9 +9,13 @@ Scroll down to the bottom of the page: https://docs.docker.com/desktop/
 Open docker and wait for it to start.
 
 ### Clone the jedi-edu repository
-Open a terminal window and clone the jedi-edu repository:
+Open a terminal window and clone the jedi-edu repository.
 ```
 git clone https://github.com/JCSDA-internal/jedi-edu.git
+```
+Checkout the qg_tutorial branch:
+```
+git checkout qg_tutorial
 ```
 
 ### Build and enter the container
