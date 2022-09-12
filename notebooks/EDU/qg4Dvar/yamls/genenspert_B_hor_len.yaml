@@ -5,21 +5,20 @@ background error:
   standard_deviation: 1.8e7                         # Standard deviation in m^2/s
   vertical_length_scale: 15000.0                    # Vertical correlation lengthscale in m
   randomization_seed: 7                             # Random seed
-forecast length: PT24H                              # need to forecast for one day
+forecast length: PT0H                               # no need to forecast
 initial condition:
   date: 2009-12-31T00:00:00Z
-  filename: qg3Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P15D.nc
+  filename: qg3Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P16D.nc
 members: 1                                          # Generate one perturbed state from the truth
 model:
   name: QG
   tstep: PT1H
 output:
   datadir: qg3Dvar/output/exp_default/bg
-  date: 2009-12-30T00:00:00Z
+  date: 2009-12-31T00:00:00Z
   exp: bkgd
-  # first: PT0S
-  frequency: PT3H
-  type: fc
+  frequency: PT6H
+  type: an
 geometry:
   nx: 40
   ny: 20
