@@ -4,7 +4,7 @@ background error:
   maximum_condition_number: 1.0e6
   standard_deviation: 1.8e7                         # Standard deviation in m^2/s
   vertical_length_scale: 15000.0                    # Vertical correlation lengthscale in m
-  randomization_seed: 7                             # Random seed
+  randomization_seed: 3                              # Random seed
 forecast length: PT24H                               # no need to forecast
 initial condition:
   date: 2009-12-30T00:00:00Z
@@ -14,11 +14,11 @@ model:
   name: QG
   tstep: PT1H
 output:
-  datadir: qg3Dvar/output/exp_default/bg
+  datadir: qg4Dvar/output/exp_default/bg
   date: 2009-12-30T00:00:00Z
   exp: bkgd
   frequency: PT3H
-  type: an
+  type: fc
 geometry:
   nx: 40
   ny: 20

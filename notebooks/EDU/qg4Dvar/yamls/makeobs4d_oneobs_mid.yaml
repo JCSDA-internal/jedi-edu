@@ -17,11 +17,11 @@ observations:
       obs type: Stream                             # The observation type is the stream function
     obs space:
       obsdataout:
-        obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.begin.nc
+        obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.mid.nc
       obs type: Stream
       # obs perturbations seed: 1
       generate:
-        begin: PT1H
+        begin: PT12H
         nval: 1
         obs locations:
           lon: [25]                                # List of longitudes for generated observations (only one here)
