@@ -19,12 +19,13 @@ cd jedi-edu
 git checkout qg_tutorial
 ```
 
-### Build and enter the container
+### Build and enter the container for the first time
 ```
 cd container
 docker build -t educontainer --build-arg=Dockerfile .
 docker run -it --rm -p 9999:8888 -v <your>/<path>/<to>/jedi-edu/notebooks/:/home/jedi/ educontainer
 ```
+The next time you want to enter the container, you will only need to enter the `docker run` command.
 
 You will see a message resembling:
 ```
