@@ -51,6 +51,7 @@ In the launcher sub-window, click on `terminal`.
 Enter the following commands in your web terminal:
 ```
 cd EDU
+git config --global credential.helper "cache --timeout=3600"
 git clone https://github.com/JCSDA-internal/oops-bundle.git
 cd build
 ecbuild ../oops-bundle
