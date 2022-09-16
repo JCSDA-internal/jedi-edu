@@ -54,15 +54,15 @@ def func(args):
         if args.plotwind:
             fields_u = []
             fields_v = []
-        if args.obsLocations:
+        if args.plotObsLocations:
             # Variables to get
             obs_types = ["Stream", "Wind", "WSpeed"]
             # Check file extension
-            if not args.obsLocations.endswith(".nc"):
+            if not args.plotObsLocations.endswith(".nc"):
                 print("   Error: filepath extension should be .nc")
                 sys.exit(1)
             # Get data
-            res = netCDF4.Dataset(args.obsLocations)
+            res = netCDF4.Dataset(args.plotObsLocations)
             for obs_type in obs_types:
                 if obs_type in res.groups:
                     locations = res.groups[obs_type].groups["Location"].variables["values"][:,:]
@@ -129,9 +129,9 @@ def func(args):
         max_lon = np.max(lon_coord)
         min_lat = np.min(lat_coord)
         max_lat = np.max(lat_coord)
-        
+
         # Get obs locations in other unit
-        if args.obsLocations:
+        if args.plotObsLocations:
             indexes = []
             for ii in range(len(obs_lon)):
                 obs_lat[ii] = 90/(max_lat-min_lat) * (obs_lat[ii] - min_lat)
@@ -142,10 +142,14 @@ def func(args):
 
         # Define color levels
         clevels = []
-        vmax = 0.0
-        for level in levels:
-            for field in fields_plot:
-                vmax = max(vmax, np.max(np.abs(field[level])))
+        if args.fieldmax:
+            vmax = int(args.fieldmax)
+        else:
+            vmax = 0.0
+            for level in levels:
+                for field in fields_plot:
+                    vmax = max(vmax, np.max(np.abs(field[level])))
+        print("range:", vmax)
         for level in levels:
             clevels.append(np.linspace(-vmax, vmax, 30))
 
@@ -188,7 +192,7 @@ def func(args):
                                   fields_u_plot[iplot][level, ::dy_quiver, ::dx_quiver], fields_v_plot[iplot][level, ::dy_quiver, ::dx_quiver],
                                   scale=scale, scale_units="inches")
 
-                if args.obsLocations:
+                if args.plotObsLocations:
                     ax.scatter(obs_lon, obs_lat, marker='x', c='k', s=8, linewidths=0.5)
 
 
