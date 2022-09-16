@@ -24,9 +24,11 @@ cost function:
         obs type: Stream
       obs space:
         obsdatain:
-          obsfile: qg3Dvar/output/exp_default/obs/truth.obs3d.nc
+          engine:
+            obsfile: qg3Dvar/output/exp_default/obs/truth.obs3d.nc
         obsdataout:
-          obsfile: qg3Dvar/output/exp_default/obs/3dvar.obs3d.nc
+          engine:
+            obsfile: qg3Dvar/output/exp_default/obs/3dvar.obs3d.nc
         obs type: Stream
 variational:
   minimizer:

@@ -18,9 +18,11 @@ cost function:
         obs type: Stream
       obs space:
         obsdatain:
-          obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.mid.nc
+          engine:
+            obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.mid.nc
         obsdataout:
-          obsfile: qg4Dvar/output/exp_default/obs/4dvar.1obs.mid.nc
+          engine:
+            obsfile: qg4Dvar/output/exp_default/obs/4dvar.1obs.mid.nc
         obs type: Stream
       obs error:
         covariance model: diagonal

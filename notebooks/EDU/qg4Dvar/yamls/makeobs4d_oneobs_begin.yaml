@@ -17,7 +17,8 @@ observations:
       obs type: Stream                             # The observation type is the stream function
     obs space:
       obsdataout:
-        obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.begin.nc
+        engine:
+          obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.begin.nc
       obs type: Stream
       # obs perturbations seed: 1
       generate:

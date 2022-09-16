@@ -12,7 +12,9 @@ observations:
   - obs operator:
       obs type: Stream                             # The observation type is the stream function
     obs space:
-      obsdataout:
+
+        engine:
+          obsfile:
         obsfile: qg3Dvar/output/exp_default/obs/truth.obs3d.nc
       obs type: Stream
       generate:
