@@ -16,14 +16,13 @@ git clone https://github.com/JCSDA-internal/jedi-edu.git
 Checkout the qg_tutorial branch:
 ```
 cd jedi-edu
-git checkout qg_tutorial
 ```
 
 ### Build and enter the container for the first time
 ```
 cd container
 docker build -t educontainer --build-arg=Dockerfile .
-docker run -it --rm -p 9999:8888 -v <your>/<path>/<to>/jedi-edu/notebooks/:/home/jedi/ educontainer
+docker run -it --rm -p 9999:8888 -v <your>/<path>/<to>/jedi-edu/notebooks/:/home/nonroot/shared educontainer
 ```
 The next time you want to enter the container, you will only need to enter the `docker run` command.
 
@@ -43,22 +42,6 @@ Then you should open the browser and go to:
 
 Open your favorite browser and go to `localhost:9999`
 All that follows is done **in the container ON THE WEBPAGE you just opened**.
-
-### Clone and build oops-bundle
-In the launcher sub-window, click on `terminal`.
-
-![welcome](img/welcome.png)
-
-Enter the following commands in your web terminal:
-```
-cd EDU
-git config --global credential.helper "cache --timeout=3600"
-git clone https://github.com/JCSDA-internal/oops-bundle.git
-cd build
-ecbuild ../oops-bundle
-make -j4
-```
-You should not need the terminal sub-window after this.
 
 ### Open the qg 3dvar tutorial
 On the left of the web page there is a tree of files, click on the little folder icon if you aren't on it already, and double click on `qg3Dvar_tutorial.ipynb`.
