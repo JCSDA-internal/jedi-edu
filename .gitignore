@@ -14,5 +14,6 @@
 *.cache
 *.config
 *.bash_history
-notebooks/EDU/oops-bundle/
-notebooks/EDU/build/
+
+*.jpg
+*.nc
