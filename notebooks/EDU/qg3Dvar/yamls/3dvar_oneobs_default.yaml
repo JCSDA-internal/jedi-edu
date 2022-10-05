@@ -9,7 +9,7 @@ cost function:
     depths: [4000.0, 6000.0]
   background:
     date: 2009-12-31T00:00:00Z
-    filename: qg3Dvar/output/exp_default/bg/bkgd.an.2009-12-31T00:00:00Z.nc
+    filename: qg3Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00:00:00Z.P1D.nc
   background error:                    # Note that this should be the same as during background generation
     covariance model: QgError
     horizontal_length_scale: 2.2e6
