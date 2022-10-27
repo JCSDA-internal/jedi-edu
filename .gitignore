@@ -1,5 +1,6 @@
 # This file tells git that it should not track certain files.
 
+*__pycache__
 *.swp
 *~
 *.DS_Store

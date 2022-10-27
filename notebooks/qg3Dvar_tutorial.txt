@@ -1,0 +1,1140 @@
+Welcome to the 3DVar tutorial
+------------------------------------------------------------------------
+
+In this tutorial we will explore the basic features of 3DVar, using a
+so-called quasi-geostrophic model. The model mimics the evolution of
+large-scale features, such as high and low pressure cells in the
+atmosphere. In the following we first provide a short description of the
+3DVar problem and of the quasi-geostrophic model and what it represents,
+followed by the data-assimilation experiments.
+
+Introduction to 3DVar
+
+For those familiar with the 3DVar data-assimilation method this section
+can be skipped. 3DVar is a data-assimilation method that solves the
+data-assimilation problem at a given point in time. The basic idea is
+that we have a first guess of the atmospheric state from a model
+forecast x_(b), and want to update this state with a set of observations
+y obtained at this time. These observations are from the unknown true
+atmospheric state, and the measurement process is described by
+y = H(x_(true)) + ϵ_(true) in which H(..) is the so-called observation
+operator that maps a state x to observation space. The ϵ_(true) is the
+observation error. This error is due to the measurement process itself:
+every measurement will have an error related to the precision of the
+measurement. There is also another part to this error, called the
+representation error, that we will not discuss here as it is not
+essential for understanding 3DVar. The 3DVar tries to find the state
+that is both close to our first guess x_(b) and close to the
+observations y. It seems natural to measure closeness in terms of the
+uncertainty in each of them. If the first guess is less certain, the
+solution doesn't have to be that close to the prior than if it had very
+small uncertainty. This suggests to set up a variational problem in
+which we minimize a so-called cost function J(x), defined as
+$J(x) = \frac{(x-x_b)^2}{\sigma_b^2} + \frac{(y-x)^2}{\sigma_y^2}$ in
+which σ_(b) is the standard deviation of the error in x_(b), and σ_(y)
+is the standard deviation of the error in y. If, for instance, σ_(b) is
+much larger than σ_(y) the first term will become important in the cost
+function for large variations of x from x_(b), while the second term
+becomes important for much smaller variations of x from y. This shows
+that this cost function makes sense. (This cost function might seem ad
+hoc, but it can be derived from Bayes Theorem.) The minimum of this cost
+function is found by setting its gradient to zero. In this simple
+problem we find for the gradient:
+$\frac{d J(x)}{dx} = 2\frac{(x-x_b)}{\sigma_b^2} + 2\frac{(y-x)}{\sigma_y^2}$
+which we can solve for x = x_(a), the state at which the gradient is
+zero, as $x_a=x_b +\frac{\sigma_b^2}{\sigma_b^2+\sigma_y^2}(y-x_b)$ We
+see that the analysis state is a linear combination of the first guess
+and the observation. To see this more clearly we can rewrite the
+equation as
+$x_a=\frac{\sigma_y^2}{\sigma_b^2+\sigma_y^2}x_b +\frac{\sigma_b^2}{\sigma_b^2+\sigma_y^2}y$
+where the analysis is expressed as a weighted average of first guess and
+observation. When the observation error is much larger than the model
+error the weight on the first guess x_(b) is much larger than the weight
+on the observation, so the analysis will be close to the first guess.
+This is exactly what we want the data assimilation to do: the analysis
+should be closest to the quantity with the smallest error.
+
+The 3DVar method allows for extending the cost function in two ways, the
+problem can be multi-dimensional and the observation operator can be
+nonlinear. This leads to a cost function
+
+The deviation of x from x_(b) is weighted by the first-guess error
+covariance B, and deviation of x from y is weighted by the observation
+error covariance. The gradient of the cost function is given by
+$\frac{d J(x)}{dx} = 2B^{-1}(x-x_b) - 2H^T R^{-1}\left(y-H(x)\right)$
+Note the similarity with and the difference from the scalar case above,
+especially the error variances there and the covariance matrices here.
+If H(..) is a linear function we can find an analytical expression for
+the state x_(a) for which the gradient is zero. Doing that and
+collecting all appearances of x − x_(b) on the left hand side and then
+subtract H^(T)R^( − 1)Hx_(b) from both sides of the equation results in
+(B^( − 1)+H^(T)R^( − 1)H)(x_(a)−x_(b)) = H^(T)R^( − 1)(y−Hx_(b)) The
+solution is now obtained as:
+x_(a) = x_(b) + (B^( − 1)+H^(T)R^( − 1)H)^( − 1)H^(T)R^( − 1)(y−Hx_(b))
+which some of you might recognize as the Kalman filter solution in
+precision form. Indeed, 3DVar and the Kalman Filter give the same
+solution as the 3DVar when H(..) is linear. We can rewrite this equation
+as
+x_(a) = (B^( − 1)+H^(T)R^( − 1)H)^( − 1)B^( − 1)x_(b) + (B^( − 1)+H^(T)R^( − 1)H)^( − 1)H^(T)R^( − 1)y
+where we can immediately see how the first-guess and observation
+covariances determine the analysis state. When the observation
+covariance is large, so the observations are inaccurate, the first term
+dominates and the analysis is close to the first guess. If, on the other
+hand, the observations are very accurate the second term dominates and
+the analysis will be closer to the observations.
+
+To make the connection with the scalar case we can use some matrix
+identities to rewrite the analysis equation as the standard covariance
+form of the Kalman filter
+
+We can multiply this equation with H and rewrite it as
+
+and a direct identification with the scalar case can be made in terms of
+error variances in the scalar case and error covariances in the
+multi-dimensional case. The 3DVar solution is a weighted average between
+the first guess in observation space and the observations, with the
+weight determined by the covariances of first guess and observation
+errors.
+
+Going back to Kalman filter equation in covariance form, which, as
+mentions is also the solution of the 3DVar problem, the importance of
+the B matrix becomes apparent. The so-called innovation y − Hx_(b), so
+the difference between the observation and the model forecast in
+observation space, is first multiplied by (HBH^(T)+R)^( − 1), and the
+resulting vector is still in observation space. The transition to state
+space is made via the multiplication by BH^(T). Assume that we only have
+one observation of, say, pressure at a certain point in space. That
+observation will not only update the pressure at that point, but it will
+influence many other variables too, depending on the covariance
+structure of the B matrix.
+
+When H(..) is nonlinear we cannot write down an explicit solution, and
+instead have to use iterative methods to solve this problem. This makes
+the 3DVar, which is an iterative method, more general than the Kalman
+Filter.
+
+However, even when H(..) is linear the 3DVar has advantages in
+high-dimensional problems such as atmospheric or oceanic data
+assimilation. When we look at the solution we see that we need the
+inverse of the background error covariance B, which is a huge matrix. In
+fact, it is typically so large that we cannot even store it on a
+computer, let alone determine its inverse. For this reason a 3DVar is
+typically implemented as follows. First, a control-variable
+transformation is used, in which a new variable u is defined via
+x − x_(b) = Bu. (Note that it is also possible to use B^(1/2) in the
+transform, but JEDI uses B.) Then the problem
+(B^( − 1)+H^(T)R^( − 1)H)(x−x_(b)) = H^(T)R^( − 1)(y−Hx_(b)) becomes
+(I+H^(T)R^( − 1)HB)u = H^(T)R^( − 1)(y−Hx_(b)) which is of the form
+Au = b, and this equation is solved iteratively. The matrix B is not
+stored as a matrix, but instead as a piece of code that takes as input a
+vector u, and generates as output Bu.
+
+With this we are at the end of this short introduction of 3DVar. Next we
+very briefly describe the quasi-geostrophic model, before we dive into
+the experiments with JEDI.
+
+The Quasi-geostrophic model
+
+This section provides a short description of the quasi-geostrophic model
+used in the experiments below. The model evolves the potential vorticity
+over time, with a velocity field derived from the stream function. In
+turn, the stream function field is calculated from the potential
+vorticity. Mathematically, the model has two layers and for each layer
+the model equations are $\frac{D q_i}{dt} = 0$ where the q_(i) denote
+the quasi-geostrophic potential vorticity in vertical layer i. The
+equation expresses that potential vorticity is conserved following air
+parcels. It is given by
+q_(i) = ∇²ψ_(i) + ℱ_(i, i − 1)(ψ_(i − 1)−ψ_(i)) + ℱ_(i, i + 1)(ψ_(i + 1)−ψ_(i)) + βy
+This equation describes the three terms that build up potential
+vorticity, namely relative vorticity, which is the rotation of air
+parcels relative to the solid Earth, the layer thickness, represented by
+the ℱ terms, and the northward position of the air parcel y where β is
+the northward derivative of the Coriolis parameter. This parameter
+describes the daily rotation of the Earth around it axis. The actual
+expressions for the ℱ will not be given here, but, as you would expect,
+they contain the layer thicknesses and the potential temperatures of the
+layers. The conservation equation for potential vorticity describes the
+balance of changes in relative vorticity, in planetary vorticity, and in
+stretching of the fluid column. When one or more of these term changes
+the others have to compensate to conserve potential vorticity. The model
+represents a zonal strip around the Earth, so the fields are periodic in
+the East-West direction and we use free slip on the northern and
+southern boundaries (which means that the meridional velocities are zero
+along those boundaries, but the zonal velocities are free to vary).
+
+3DVar data-assimilation experiments
+
+To set up the data assimilation experiment and run 3DVar we take the
+following steps:
+
+1.  We first generate the equivalent of a real atmospheric or oceanic,
+    or other system. This run we call the truth, and in the following we
+    will use the atmosphere as an example.
+2.  We then generate the starting point for our data assimilation
+    experiment. This starting point will be close to, but not the same
+    as, the truth starting point. To be consistent, we perturb the truth
+    state with a random draw from the initial state error distribution.
+    In 3DVar this error distribution is again chosen Gaussian. In the
+    real world this background state comes from a forecast, and contains
+    all prior information we have.
+3.  Then we obtain observations from that truth run, just as
+    observations are generated in the real world. That is, we take
+    measurements of that truth run and then add an observation error to
+    that measurement. This observation error is a random draw from the
+    error distribution of the observations. In 3DVar the assumption is
+    that observation errors are Gaussian distributed. We do all this to
+    mimic what happens when we take real observations from the real
+    atmosphere.
+4.  The final step is to perform the data assimilation, i.e. to run the
+    3DVar.
+
+The following is a quick overview of where the files are. To do this,
+you can navigate the menu on your left or you can list the files under
+the different directories. Now for using Jupyter Labs notebooks: you can
+click on any box that contains code (like the one below) and hit play,
+it will run the piece of code there!
+
+For convenience, you need to export a few environment variables:
+
+    export JEDI_BIN=/home/nonroot/build/bin
+    export JEDI_EDU=/home/nonroot/shared/EDU
+
+Now, try to run the following code:
+
+    ls -RCd --color $JEDI_BIN/qg*            # list the files in this directory
+    ls -RCd --color $JEDI_EDU/qg3Dvar/*/*
+
+Look at the directory structure you just displayed: this is where you
+will need to navigate to find plots, yamls, analysis et background
+files...
+
+The files you will change are the yaml files (see where they are in the
+structure above). When you run jedi it will create output as indicated.
+Note that each experiment has a bg directory with the background files,
+an obs directory with the observation files and a da directory with the
+analysis files. These files are generated by jedi and can also be
+vizualized using python, as explained later.
+
+Now you are all ready to go!
+
+Overview of the experiments
+
+In the following you will conduct several experiments. Most will be
+experiments in which you will assimilate one observation. This will
+allow you to better understand the JEDI system, but you will especially
+appreciate how 3DVar works, specifically the role of the covariances
+matrices for observations and the background. This understanding is a
+very good introduction to most present-day data assimilation methods, as
+the way the covariances work is very similar in 3DVar, in Ensemble
+Kalman Filters, in 4DVar, and in hybrid methods. The experiments with
+one observation are as follows:
+
+  ---------------------------------------------------------------------------------------------------
+  Description       Background yaml file        Observation yaml file     Data assimilation file
+  ----------------- --------------------------- ------------------------- ---------------------------
+  exp_default       genenspert_B_default.yaml   makeobs3d_oneobs.yaml     3dvar_oneobs_default.yaml
+
+  exp_hor_len       genenspert_B_hor_len.yaml   makeobs3d_oneobs.yaml     3dvar_oneobs_hor_len.yaml
+
+  exp_ver_len       genenspert_B_ver_len.yaml   makeobs3d_oneobs.yaml     3dvar_oneobs_ver_len.yaml
+
+  exp_std_BR        genenspert_B_std_BR.yaml    makeobs3d_std_BR.yaml     3dvar_std_BR.yaml
+
+  exp_mult_obs      genenspert_B_default.yaml   makeobs3d_mult_obs.yaml   3dvar_mult_obs.yaml
+  ---------------------------------------------------------------------------------------------------
+
+Our last experiment with 3DVar will be a more realistic case with 100
+randomly positioned observations.
+
+Experiment 1: 3dvar with one observation
+
+------------------------------------------------------------------------
+
+Step 1: Generate the truth
+
+The JEDI system works with yaml files, which are essentially control
+files that contain commands that execute specific tasks coded in the
+JEDI system. You will get used to them quickly! We first generate a
+truth run, with would correspond to the evolution of the true
+atmosphere. This run will be the basis for all experiments we will do in
+this 3Dvar exercise. We use from the yaml-files directory the file
+generate_truth.yaml. Note the comments after each line, explaining the
+contents of each line in the yaml file.
+
+First move to your directory /home/nonroot/shared/EDU/qg3Dvar/yamls and
+open (double click on the file in the tree) the file
+generate_truth.yaml, which looks like this:
+
+    forecast length: P18D                             # Run truth model for 18 days
+    geometry:                                         # Declare the geometry of the model grid points
+      nx: 40                                          # number of grid points in zonal direction
+      ny: 20                                          # number of grid points in the meridional direction
+      depths: [4000.0, 6000.0]                        # Height of 1st and 2nd layer
+    initial condition:                                # Declare details of initial condition
+      date: 2009-12-15T00:00:00Z                      # Date of initial condition
+      read_from_file: 0                               # Initial condition not read from file but internally generated
+    model:                                            # Declare model used
+      name: QG                                        # Quasi-geostrophic model
+      tstep: PT10M                                    # Time step is 10 min
+    output:                                           # Declare output
+      datadir: qg3Dvar/output/truth/                  # Directory where output file will be stored
+      date: 2009-12-15T00:00:00Z                      # Date of output file
+      exp: truth                                      # Experiment to generate truth file
+      frequency: PT6H                                 # Output frequency is every 6 hours
+      type: fc                                        # Truth comes from running qg model in forecast mode
+    prints:                                           # Declare output specifics
+      frequency: PT3H                                 # Generate output every 3 hours
+
+Check what this file does: the file runs the 40 by 20 by 2 (layers)
+quasi-geostrophic model in a standard configuration. Have a good look at
+the file, see if it makes sense, and note the simple instructions for
+this simple problem.
+
+After this yaml file is edited as desired we can generate the truth run
+via:
+
+    cd $JEDI_EDU/
+    $JEDI_BIN/qg_forecast.x ./qg3Dvar/yamls/generate_truth.yaml
+
+You should be able to find the output files in
+/home/nonroot/shared/EDU/qg3Dvar/output/truth. The directory should have
+the files
+
+    truth.fc.2009-12-15T00:00:00Z.PT0S.nc
+    truth.fc.2009-12-15T00:00:00Z.PT6H.nc
+    truth.fc.2009-12-15T00:00:00Z.PT12H.nc
+    truth.fc.2009-12-15T00:00:00Z.PT18H.nc
+    truth.fc.2009-12-15T00:00:00Z.P1D.nc
+    truth.fc.2009-12-15T00:00:00Z.P1DT6H.nc
+    …
+    truth.fc.2009-12-15T00:00:00Z.P18D.nc
+
+You can check that this is true by finding these files in the tree on
+your left, or list the files in
+/home/nonroot/shared/EDU/qg3Dvar/output/truth with
+
+    ls $JEDI_EDU/qg3Dvar/output/truth
+
+Remember that we set the initial time in the yaml file as 2009-12-15
+00:00:00. PTXX means the forecast length from the initial time. E.g.,
+the actual time for the file 2009-12-15T00:00:00Z.PT12H.nc will be
+2009-12-15 12:00:00. Check that the total run time is 18 days (look at
+the files in the list), consistent with your yaml file. We can make a
+plot of the truth run using the plotting scripts in
+/home/nonroot/shared/EDU/plots_scripts. You need to use it like this:
+
+    python ./plot.py <model name> <diagnostic to plot> <path/to/file> --plotwind --output <path/to/output/NAME>
+
+For example to plot the different fields of the truth run at 16 days,
+you will need the following commands:
+
+    cd $JEDI_EDU/plots_scripts
+    python ./plot.py qg fields $JEDI_EDU/qg3Dvar/output/truth/truth.fc.2009-12-15T00\:00\:00Z.P16D.nc \
+            --plotwind --output $JEDI_EDU/qg3Dvar/output/truth/plots/truth
+
+For more details about the plotting tool, please read the documentation.
+This calls python to generate plots for the potential vorticity fields,
+the stream function fields and the wind fields after 16 days of
+forecast. You can view these plots in
+/home/nonroot/shared/EDU/qg3Dvar/output/truth/plots/. The last 2 days
+will be used as forecasts without data assimilation. These plots will
+show velocity vectors, if you don't want those you can remove the flag
+--plotwind option in the above instructions. Now have a look at the
+output using your favorite .jpg viewer (this can be python). The files
+truth_x.jpg and truth_q.jpg contain the stream function (x) and
+potential vorticity (q) in both layers. These should look something
+like: Now we are done with the truth, let's generate the background
+field in the next step.
+
+Step 2: Generate the background state
+
+We now generate our best initial guess of the state of the system, the
+background state. We use the following yaml
+file genenspert_B_default.yaml:
+
+    background error:
+      covariance model: QgError                         # Use the pre-defined QG error model
+      horizontal_length_scale: 2.2e6                    # Horizontal correlation scale in m
+      maximum_condition_number: 1.0e6
+      standard_deviation: 1.8e7                         # Standard deviation in m^2/s
+      vertical_length_scale: 15000.0                    # Vertical correlation lengthscale in m
+      randomization_seed: 3                             # Random seed
+    forecast length: PT24H                              # forecast for one day
+    initial condition:
+      date: 2009-12-31T00:00:00Z
+      filename: qg3Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P15D.nc
+    members: 1                                          # Generate one perturbed state from the truth
+    model:
+      name: QG
+      tstep: PT1H
+    output:
+      datadir: qg3Dvar/output/exp_default/bg
+      date: 2009-12-30T00:00:00Z
+      exp: bkgd
+      frequency: PT3H
+      type: fc
+    geometry:
+      nx: 40
+      ny: 20
+      depths: [4000.0, 6000.0]
+    perturbed variables: [x]                            # Perturb the whole state vector x
+
+This file perturbs the state variables [x] with a random vector drawn
+from the QG Error covariance model with a correlation length scale of
+2200km and standard deviation 1.8e7 m²/s. Note that the control run is
+generated by adding perturbations to the truth at 2009-12-31-00:00:00.
+You can create the background by running:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_gen_ens_pert_B.x ./qg3Dvar/yamls/genenspert_B_default.yaml
+
+The output file will be in
+$JEDI_EDU/qg3Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00:00:00Z.P1D.nc.
+You can have a look at the perturbation fields and compare the control
+run (the background you just created) and the truth by running:
+
+    cd $JEDI_EDU/plots_scripts
+    python ./plot.py qg fields \
+            $JEDI_EDU/qg3Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00\:00\:00Z.P1D.nc \
+            $JEDI_EDU/qg3Dvar/output/truth/truth.fc.2009-12-15T00\:00\:00Z.P16D.nc \
+            --output $JEDI_EDU/qg3Dvar/output/exp_default/plots/bkgd_error --title "background error"
+
+The plots will look something like the following. Note that your files
+might look different because of different random numbers used, but the
+statistics, such as typical length scales and amplitudes, should be the
+same. Displayed are the difference between the background stream
+function and the true stream function for both layers. We can also look
+at the difference in meridional velocity. Note the size of the
+differences.
+
+Our next step is to collect observations. In our simulated experiments
+we actually have to generate the observations from the truth.
+
+Step 3: Generate observations
+
+In this tutorial we will use two types of observation strategies: one
+observation at one grid point and 100 observations generated at random
+locations in the model. We start with the one-observation experiments,
+using an upper-layer stream function observation.
+
+We need to look at the file makeobs3d_oneobs.yaml that contains the
+settings to generate the observation for our first experiment. Look at
+each line and check the comments to see if they make sense to you.
+
+    geometry:
+      nx: 40
+      ny: 20
+      depths: [4000.0, 6000.0]
+    state:
+      date: 2009-12-31T00:00:00Z
+      filename: qg3Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P16D.nc
+    window begin: 2009-12-30T18:00:00Z
+    window length: PT12H
+    observations:
+      observers:
+      - obs operator:
+          obs type: Stream               # The observation type is the stream function
+        obs space:
+          obsdataout:
+            engine:
+              obsfile: qg3Dvar/output/exp_default/obs/truth.obs3d.nc
+          obs type: Stream
+          generate:
+            begin: PT6H
+            nval: 1
+            obs locations:
+              lon: [-10]                 # List of longitudes for generated observations (only one here)
+              lat: [35]                  # List of latitudes for generated observations (only one here)
+              z: [7000.0]                # List of heights for generated observations (only one here)
+            obs error: 4.0e6             # Observation error standard deviation, in m^2/s
+            obs period: PT12H
+    make obs: true                       # Generate the observations
+    obs perturbations: true              # Add random  measurements to the observations
+
+Note the last line, in which we add a random error to the observation.
+This is to mimic what happens in the real world where measurement errors
+are always present. The measurement error is drawn from a Gaussian
+distribution with standard deviation given in the line with
+obs error: 4.0e6.
+
+It reads observations at time 18:00, so 18 hours after the start of the
+truth run.
+
+Execute the following command to make this observation:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_hofx3d.x ./qg3Dvar/yamls/makeobs3d_oneobs.yaml
+
+The output file is in
+/home/nonroot/shared/EDU/qg3Dvar/output/exp_default/obs/truth.obs3d.nc.
+To view this file we can convert it to an easily readable txt file with:
+
+    cd $JEDI_EDU/plots_scripts
+    python ./plot.py qg obs $JEDI_EDU/qg3Dvar/output/exp_default/obs/truth.obs3d.nc \
+            --output $JEDI_EDU/qg3Dvar/output/exp_default/plots/qg_oneobs
+
+And display the content of this text file (which has the location, the
+observation value and the truth denoted as hofx, pronounced "H of x"):
+
+    cat $JEDI_EDU/qg3Dvar/output/exp_default/plots/qg_oneobs.txt
+
+We are now in the same situation as a numerical weather prediction
+center: we have the background and observations and are ready to perform
+the data assimilation in step 4!
+
+Step 4: Run the 3DVar!
+
+We are now in a position to perform the data assimilation, in this case
+a 3dvar. Have a look at 3dvar_oneobs_default.yaml and see if you can
+understand every line:
+
+    cost function:
+      cost type: 3D-Var
+      window begin: 2009-12-30T21:00:00Z
+      window length: PT6H
+      analysis variables: [x]
+      geometry:
+        nx: 40
+        ny: 20
+        depths: [4000.0, 6000.0]
+      background:
+        date: 2009-12-31T00:00:00Z
+        filename: qg3Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00:00:00Z.P1D.nc
+      background error:              # Note that this should be the same as during background generation
+        covariance model: QgError
+        horizontal_length_scale: 2.2e6
+        maximum_condition_number: 1.0e6
+        standard_deviation: 1.8e7
+        vertical_length_scale: 15000.0
+      observations:
+       observers:
+        - obs error:                 # Note that observation error information is in the observation file
+            covariance model: diagonal
+          obs operator:
+            obs type: Stream
+          obs space:
+            obsdatain:
+              engine:
+                obsfile: qg3Dvar/output/exp_default/obs/truth.obs3d.nc
+            obsdataout:
+              engine:
+                obsfile: qg3Dvar/output/exp_default/obs/3dvar.obs3d.nc
+            obs type: Stream
+    variational:
+      minimizer:
+        algorithm: DRIPCG                  # The minimizer is a variant of the conjugate gradient algorithm
+      iterations:
+      - diagnostics:                       # First outer loop
+          departures: ombg                 # Generate the observations - background departures
+        gradient norm reduction: 1.0e-10   # Stop the minimization when either the gradient norm is this size
+        ninner: 10                         # or when the number of inner loops exceeds 10
+        geometry:
+          nx: 20
+          ny: 10
+          depths: [4000.0, 6000.0]
+        test: on
+        online diagnostics:
+          write increment: true
+          increment:
+            datadir: qg3Dvar/output/exp_default/da
+            date: 2009-12-31T00:00:00Z
+            exp: 3dvar.iter1
+            type: in
+      - diagnostics:                       # Second outer loop
+          departures: ombg
+        gradient norm reduction: 1.0e-10
+        ninner: 10
+        geometry:
+          nx: 40
+          ny: 20
+          depths: [4000.0, 6000.0]
+        test: on
+        online diagnostics:
+          write increment: true
+          increment:
+            datadir: qg3Dvar/output/exp_default/da
+            date: 2009-12-31T00:00:00Z
+            exp: 3dvar.iter2
+            type: in
+    final:
+      diagnostics:
+        departures: oman                   # After minimization generate observations - analysis departures
+      increment:                           # Save the increment
+        geometry:
+          nx: 40
+          ny: 20
+          depths: [4000.0, 6000.0]
+        output:
+          datadir: qg3Dvar/output/exp_default/da
+          date: 2009-12-31T00:00:00Z
+          exp: 3dvar.increment
+          filename: 3dvar.increment
+          type: in
+          analysis variables: [x]
+    output:
+      datadir: qg3Dvar/output/exp_default/da
+      exp: 3dvar
+      frequency: PT6H
+      type: an
+
+Run this code via
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_4dvar.x ./qg3Dvar/yamls/3dvar_oneobs_default.yaml
+
+You have done it! Your first ever data-assimilation run with JEDI!
+
+There will be four files in
+/home/nonroot/shared/EDU/qg3Dvar/output/exp_default/da. List them with
+the command below, do you know what each file represents?
+
+    ls $JEDI_EDU/qg3Dvar/output/exp_default/da
+
+We will now plot the results using the python plotting script. The first
+plot is a plot of the increments from the data assimilation. Run:
+
+    cd $JEDI_EDU/plots_scripts
+    python ./plot.py qg fields \
+            $JEDI_EDU/qg3Dvar/output/exp_default/da/3dvar.an.2009-12-31T00\:00\:00Z.nc \
+            $JEDI_EDU/qg3Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00\:00\:00Z.P1D.nc \
+            --plotObsLocations $JEDI_EDU/qg3Dvar/output/exp_default/obs/truth.obs3d.nc \
+            --plotwind \
+            --output $JEDI_EDU/qg3Dvar/output/exp_default/plots/3dvar_increment --title "analysis increment"
+
+Your plots should look very much like the following. Let's see if this
+figure make sense, and learn a lot about the working of 3DVar in the
+process. The figure shows the increment in the observed variable, the
+stream function. But wait, we only observed one grid point in the upper
+layer, but we see analysis increments in a much larger area. To
+understand this, remember the 3DVar update equation, which for a linear
+observation operator H is equal to that of the Kalman filter:
+
+Since there is only one observation R is a scalar, the observation error
+variance. This means that HBH^(T) also has to be a scalar (and it is
+indeed). Remember hat H maps the state vector in observation space, so
+the full 1600 (40 by 20 by 2) dimensional state vector is mapped to a
+1-dimensional scalar. This means that H is a matrix with 1 row and 1600
+columns, and HBH^(T) is just a scalar. Hence, the spreading of
+information over the larger domain has to come from BH^(T), which is a
+matrix of size 1600 by 1. Indeed, it maps the scaled innovation
+(HBH^(T)+R)^( − 1)(y−Hx_(b)) back to state space. The covariances
+between grid points in the prior error covariance B spread this
+information out in state space. Remember that the spatial length scale
+in the B matrix is 2200 km, and the grid spacing is ???km, so 2.2 grid
+points. The figure shows that the spread of information is indeed about
+twice as large as the correlation length scale specified for the B
+matrix, as expected for a Gaussian correlation structure. This raises
+the question is we could set this correlation length scale much larger,
+for instance to get an update over the whole domain just from one
+observation. Pushing this a bit, one might argue that satellites are not
+needed, we just need a set of well chosen surface observations and large
+length scales in the B matrix. However, that thinking is incorrect. The
+B matrix should contain the length scales of the physical processes. The
+relevant processes are the high- and low pressure systems, as seen in
+the true state, one of the first figures in this tutorial above. Indeed,
+the length scales of the increment have the length scales seen in that
+figure, which means that we have set the length scales in the B matrix
+correctly. The physical reason for this length scale is that a pressure
+perturbation at a certain grid point will be physically related to other
+pressure perturbations around it, and the typical length scale of these
+relations is the length scale that should be used in the B matrix.
+
+A question: back to the figure, we only observed a grid point in the
+upper layer, but there is an increment in the lower layer too. Can you
+figure out why, perhaps from the yaml file used to generate the 3Dvar
+solution, or in the yaml file used to generate the background state?
+
+Indeed, it is the vertical_length_scale, which is set to 15000 m. Given
+the layer thicknesses of 4000 and 6000 m, the two layers are highly
+correlated, and an increment in the upper layer will be quite similar in
+the lower layer.
+
+As a final thing we will look at the magnitude of the increment. At the
+observation location we can write, because we have only one observation:
+x_(a) = x_(b) + b(b+r)^( − 1)(y−x_(b))
+
+in which b is the background error variance at the observed location, r
+is the variance of the observation error, and we removed the H because
+we are observing the stream function directly at this grid point, so
+H = 1. Using this equation and the values for b from the background
+error standard deviation (1.8e7m²/s, so b = 3.24e14) and for r from the
+observation error standard deviation (4.0e6 m²/s, so r = 1.6e13), and
+your values for the observation and the background state at that grid
+point (estimate the latter from the background error and the truth value
+in the observation file), check that the value of the stream function
+increment makes sense.
+
+For our set of random numbers we obtained y =  − 2.18e8 and
+x_(b) ≈  − 2.1e8 − 1.9e7 =  − 2.29e8, leading to an estimate analysis
+increment for the stream function of 0.95 * (−2.18e8−(−2.29e8)) = 1.0e7,
+while the 3DVar analysis in the figure gives about 1.3e7. This is
+consistent given our very rough estimate. (Note that this should be an
+exact match, and it will be if the exact background and analysis values
+are used.) We can also look at how derived variables are affected by
+these increments in stream function. The next two figures show the zonal
+and meridional velocity increments.
+
+Remember that they are related to the streamfunction through
+
+Check that signs and orders of magnitude are indeed as you would expect.
+
+While these increments are directly derived from the increments in the
+stream function, this will be more interesting in a numerical weather
+prediction model. There the pressure (corresponding to the stream
+function in a QG model) and the velocities are not necessarily in
+geostrophic balance; we do have ageostrophic velocities in the real
+atmosphere, and in our more complete numerical models. Still, the
+velocity increments will be similar to a pressure observation. Why do
+you think that is?
+
+The answer is that we know that the winds will be in geostrophic balance
+to a very large extend, so we will build an approximate geostrophic
+relation into the B matrix. How this is done is beyond this tutorial,
+but this is standard practice in 3DVar, and has been for many decades.
+
+The final figure is the potential vorticity increment:
+
+Check if this makes sense to you.
+
+After you have done that, note the anti-cyclonic circulation related to
+the positive mass anomaly from the stream function increment field.
+
+This concludes the first 3DVar data-assimilation experiment. Please
+check that you:
+
+1.  Understand how to generate a truth run, the background field,
+    observations, and a data assimilation run in JEDI,
+2.  Understand how the background error covariance matrix determines how
+    observation information is spread around over the model state
+3.  Get an initial idea of how error magnitudes influence the
+    increments. More about that in the next experiments!
+
+In the next experiments we will change background and observation
+characteristics to get a better feel for the 3DVar and for the JEDI
+system.
+
+Experiment 2: Change the horizontal length scale of the background error
+
+------------------------------------------------------------------------
+
+In the experiment exp_hor_len, we decrease the horizontal length scale
+of the background error covariance, so instead of using the same as in
+exp_default horizontal_length_scale: 2.2e6 we will use
+horizontal_length_scale: 1.1e6. We will follow the same 4-step procedure
+as before.
+
+Step 1: Truth
+
+The truth should be exactly the same, we can skip step 1.
+
+Step 2: Background
+
+Generate a background state and covariance model In order to be
+consistent, when we change the horizontal length scale of the background
+error we also need to re-generate the control run. Make a copy of the
+genenspert_B_default.yaml file and check that you have a new file named
+genenspert_B_hor_len.yaml in the yamls folder:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/genenspert_B_default.yaml $JEDI_EDU/qg3Dvar/yamls/genenspert_B_hor_len.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to modify this new yaml file (right now it is just a copy of
+the first one). To do so, open genenspert_B_hor_len.yaml (double click
+on it in the tree of files) and change the value for the
+horizontal_length_scaleto 1.1e6. You also need to change which directory
+(datadir in the yaml file) the background will be written to! Use
+exp_hor_len instead of exp_default.
+
+Execute these commands:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_gen_ens_pert_B.x ./qg3Dvar/yamls/genenspert_B_hor_len.yaml
+
+The output file will be in
+/home/nonroot/shared/EDU/qg3Dvar/output/exp_hor_len/bg/bkgd.fc.2009-12-30T00:00:00Z.P1D.nc
+
+Step 3: Observations
+
+The observations are the same, so we just can copy them from the default
+experiment (and verify that it is there):
+
+    cp $JEDI_EDU/qg3Dvar/output/exp_default/obs/truth.obs3d.nc $JEDI_EDU/qg3Dvar/output/exp_hor_len/obs
+    ls $JEDI_EDU/qg3Dvar/output/exp_hor_len/obs
+
+Step 4: Run the data assimilation:
+
+Copy and paste the yaml file 3dvar_oneobs_default.yaml:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/3dvar_oneobs_default.yaml $JEDI_EDU/qg3Dvar/yamls/3dvar_oneobs_hor_len.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to open 3dvar_oneobs_hor_len.yaml and modify several values:
+
+-   horizontal_length_scale under the background error section.
+-   replace all the occurences of exp_default by exp_hor_len: this
+    ensures we are using the correct files for background and
+    observations, and aren't overwriting any previous results.
+-   rename exp from 3dvar to 3dvar_hor_len in output section at the very
+    end of the yaml file and in the parts that save the increments. Your
+    analysis will be saved as 3dvar_hor_len.an.2009-12-31T00:00:00Z.nc.
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_4dvar.x ./qg3Dvar/yamls/3dvar_oneobs_hor_len.yaml
+
+Before you look at the results, take a moment to think and form an idea
+of what you expect to see. After that, have a look at the results via
+the increment figures, generated via:
+
+    cd $JEDI_EDU/plots_scripts/
+    python ./plot.py qg fields \
+            $JEDI_EDU/qg3Dvar/output/exp_hor_len/da/3dvar_hor_len.an.2009-12-31T00\:00\:00Z.nc \
+            $JEDI_EDU/qg3Dvar/output/exp_hor_len/bg/bkgd.fc.2009-12-30T00\:00\:00Z.P1D.nc \
+            --plotObsLocations $JEDI_EDU/qg3Dvar/output/exp_hor_len/obs/truth.obs3d.nc \
+            --plotwind --output $JEDI_EDU/qg3Dvar/output/exp_hor_len/plots/3dvar_hor_len_increment --title "analysis increment"
+
+Study the results and try to answer the following questions:
+
+-   Why is the increment area smaller than in the default experiment? Is
+    this what you expected?
+-   Do the velocities have the same magnitude as in the default
+    experiment? Why, or why not?
+-   Try to make sure you understand 'everything' before you move on!
+
+This experiment should have:
+
+-   Increased your skills in using and changing yaml files
+-   Given you a better understanding of the influence of the horizontal
+    length scales used in the B matrix.
+
+Experiment 3: Change the vertical length scale of the background error.
+
+------------------------------------------------------------------------
+
+In this experiment, we decrease the vertical length scale of the
+background error covariance, so instead of using in
+vertical_length_scale: 15000.0 like in exp_default we will use
+vertical_length_scale: 5000.0 in exp_ver_len.
+
+Step 1: Truth
+
+The truth should be exactly the same. So, we can skip step 1.
+
+Step 2: Background
+
+Generate a background state and covariance model In order to be
+consistent, when we change the vertical length scale of the background
+error, we also need to re-generate the control run. Make a copy of the
+genenspert_B_default.yaml file and check that you have a new file named
+genenspert_B_ver_len.yaml in the yamls folder:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/genenspert_B_default.yaml $JEDI_EDU/qg3Dvar/yamls/genenspert_B_ver_len.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to modify this new yaml file (right now it is just a copy of
+the first one). To do so, open genenspert_B_hor_len.yaml (double click
+on it in the tree of files) and change the value for the
+vertical_length_scaleto 5000.0. Don't forget to change which directory
+(datadir in the yaml file) the background will be written to! You need
+to use exp_ver_len. Execute these commands:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_gen_ens_pert_B.x ./qg3Dvar/yamls/genenspert_B_ver_len.yaml
+
+The output file will be in
+/home/nonroot/shared/EDU/qg3Dvar/output/exp_ver_len/bg/bkgd.fc.2009-12-30T00:00:00Z.P1D.nc
+
+Step 3: Observations
+
+The observations are still the same, we just can copy them from the
+default experiment:
+
+    cp $JEDI_EDU/qg3Dvar/output/exp_default/obs/truth.obs3d.nc $JEDI_EDU/qg3Dvar/output/exp_ver_len/obs
+    ls $JEDI_EDU/qg3Dvar/output/exp_ver_len/obs
+
+Step 4: Run the data assimilation
+
+Copy and paste the yaml file 3dvar_oneobs_default.yaml:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/3dvar_oneobs_default.yaml $JEDI_EDU/qg3Dvar/yamls/3dvar_oneobs_ver_len.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to open 3dvar_oneobs_hor_len.yaml and modify several values:
+
+-   vertical_length_scale under the background error section.
+-   replace all the occurences of exp_default by exp_ver_len: this
+    ensures we are using the correct files for background and
+    observations, and aren't overwriting any previous results.
+-   rename exp to 3dvar_ver_len in output section at the very end of the
+    yaml file (your analysis will be saved as
+    3dvar_ver_len.an.2009-12-31T00:00:00Z.nc)
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_4dvar.x ./qg3Dvar/yamls/3dvar_oneobs_ver_len.yaml
+
+What do you expect to see in the increments? Compare your ideas with the
+results using the increment figures, generated via:
+
+    cd $JEDI_EDU/plots_scripts/
+    python ./plot.py qg fields \
+            $JEDI_EDU/qg3Dvar/output/exp_ver_len/da/3dvar_ver_len.an.2009-12-31T00\:00\:00Z.nc \
+            $JEDI_EDU/qg3Dvar/output/exp_ver_len/bg/bkgd.fc.2009-12-30T00\:00\:00Z.P1D.nc \
+            --plotObsLocations $JEDI_EDU/qg3Dvar/output/exp_ver_len/obs/truth.obs3d.nc \
+            --plotwind --output $JEDI_EDU/qg3Dvar/output/exp_ver_len/plots/3dvar_ver_len_increment --title "analysis increment"
+
+Check the differences between these plots and the default experiment.
+
+-   Is the increment in the upper layer the same?
+-   Why is the increment in the lower layer smaller?
+
+This experiment should have
+
+-   Increased your skills in using and changing yaml files
+-   Given you a better understanding of the influence of the horizontal
+    length scales used in the B matrix.
+
+Experiment 4: Change the magnitude of the background and the observation error, while keeping their ratio fixed
+
+------------------------------------------------------------------------
+
+In this experiment, we increase the magnitude of the background error
+and the observation error covariance. In the yaml used to generate the
+control run (i.e., add perturbations to the truth) in exp_default we
+were using standard_deviation: 1.8e7. In exp_std_BR we will use
+standard_deviation: 3.6e7.
+
+In the yaml to generate the observations, we need to use
+obs error: 8.0e6 instead of obs error: 4.0e6.
+
+Step 1: Truth
+
+The truth should be exactly the same. So, we can skip step 1.
+
+Step 2: Background
+
+Generate a background state and covariance model In order to be
+consistent, when we change the vertical length scale of the background
+error, we also need to re-generate the control run. Make a copy of the
+genenspert_B_default.yaml file and check that you have a new file named
+genenspert_B_std_BR.yaml in the yamls folder:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/genenspert_B_default.yaml $JEDI_EDU/qg3Dvar/yamls/genenspert_B_std_BR.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to modify this new yaml file (right now it is just a copy of
+the first one). To do so, open genenspert_B_std_BR.yaml (double click on
+it in the tree of files) and change the value for the standard_deviation
+to 3.6e7. Don't forget to change which directory (datadir in the yaml
+file) the background will be written to! Execute these commands:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_gen_ens_pert_B.x ./qg3Dvar/yamls/genenspert_B_std_BR.yaml
+
+The output file will be in
+/home/nonroot/shared/EDU/qg3Dvar/output/exp_std_BR/bg/bkgd.fc.2009-12-30T00:00:00Z.P1D.nc
+
+Step 3: Observations
+
+Since we increase the observation error, we need to re-generate the
+observation as well. Make a copy of the makeobs3d_oneobs.yaml file and
+check that you have a new file named makeobs3d_oneobs_std_BR.yaml in the
+yamls folder:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/makeobs3d_oneobs.yaml $JEDI_EDU/qg3Dvar/yamls/makeobs3d_oneobs_std_BR.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to modify this new yaml file (right now it is just a copy of
+the first one). To do so, open makeobs3d_oneobs_std_BR.yaml (double
+click on it in the tree of files) and change the value for the obs error
+to 2.0e6. Don't forget to change which directory (in the obsfile
+section) the observations will be written to!
+
+Execute these commands:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_hofx3d.x ./qg3Dvar/yamls/makeobs3d_oneobs_std_BR.yaml
+
+Note that we are using the same random seed as is used in the default
+experiment. Therefore, the same perturbation is applied to generate the
+perturbation that is added to the truth to obtain the observation, but
+the magnitude of this perturbation is divided by 2.
+
+Step 4: Run the data assimilation:
+
+Copy and paste the yaml file 3dvar_oneobs_default.yaml:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/3dvar_oneobs_default.yaml $JEDI_EDU/qg3Dvar/yamls/3dvar_oneobs_std_BR.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to open 3dvar_oneobs_std_BR.yaml and modify several values:
+
+-   standard_deviation under the background error section section.
+-   replace all the occurences of exp_default by exp_std_BR: this
+    ensures we are using the correct files for background and
+    observations, and aren't overwriting any previous results.
+-   rename exp to 3dvar_std_BR in output section at the very end of the
+    yaml file (your analysis will be saved as
+    3dvar_std_BR.an.2009-12-31T00:00:00Z.nc)
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_4dvar.x ./qg3Dvar/yamls/3dvar_oneobs_std_BR.yaml
+
+Before you look - as always - think about what you would expect to see.
+Check the results after plotting the increment figures:
+
+    cd $JEDI_EDU/plots_scripts/
+    python ./plot.py qg fields \
+            $JEDI_EDU/qg3Dvar/output/exp_std_BR/da/3dvar_std_BR.an.2009-12-31T00\:00\:00Z.nc \
+            $JEDI_EDU/qg3Dvar/output/exp_std_BR/bg/bkgd.fc.2009-12-30T00\:00\:00Z.P1D.nc \
+            --plotObsLocations $JEDI_EDU/qg3Dvar/output/exp_std_BR/obs/truth.obs3d.nc \
+            --plotwind --output $JEDI_EDU/qg3Dvar/output/exp_std_BR/plots/3dvar_std_BR_increment --title "analysis increment"
+
+Compare the results with those from the default experiment.
+
+-   Are the shapes the same as in the default experiment?
+-   Are the magnitudes of the increments the same?
+-   Why are they different by a factor 2?
+
+This experiment should have
+
+-   Increased your skills in using and changing yaml files,
+-   Given you a better understanding of the relative influence of the B
+    and R matrices in 3DVar (and in data assimilation in general).
+
+Experiment 5: Assimilate multiple observations
+
+------------------------------------------------------------------------
+
+We now embark on a more realistic situation in which 100 observations
+are assimilated all at once.
+
+Step 1: Truth
+
+The truth should be exactly the same. So, we can skip step 1.
+
+Step 2: Background
+
+Generate a control run: we can just copy the file from the exp_default
+experiment:
+
+    cp $JEDI_EDU/qg3Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00\:00\:00Z.P1D.nc $JEDI_EDU/qg3Dvar/output/exp_mult_obs/bg/
+    ls $JEDI_EDU/qg3Dvar/output/exp_mult_obs/bg/
+
+Step 3: Observations
+
+We generate 100 observations at random locations using the
+makeobs3d_mult_obs.yaml yaml file
+
+Have a look at the observation-generating part: instead of the following
+lines in exp_default:
+
+    generate:
+      begin: PT6H
+      nval: 1
+      obs locations:
+        lon: [-10]                               # List of longitudes for generated observations (only one here)
+        lat: [35]                                # List of latitudes for generated observations (only one here)
+        z: [7000.0]                              # List of heights for generated observations (only one here)
+      obs error: 4.0e6                           # Observation error standard deviation, in m^2/s
+      obs period: PT12H
+
+We will now use in exp_mult_obs:
+
+    generate:
+      begin: PT6H
+      nval: 1
+      obs density: 100                         # Generate 100 observation
+      obs error: 4.0e6
+      obs period: PT12H
+
+Note that we don't have a saying about the locations where the
+observations are generated. Run this with:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_hofx3d.x ./qg3Dvar/yamls/makeobs3d_mult_obs.yaml
+
+You can look quickly at the different positions / values of these
+observations with
+
+    cd $JEDI_EDU/plots_scripts
+    python ./plot.py qg obs $JEDI_EDU/qg3Dvar/output/exp_mult_obs/obs/truth.obs3d.nc \
+            --output $JEDI_EDU/qg3Dvar/output/exp_mult_obs/plots/qg_multobs
+    cat $JEDI_EDU/qg3Dvar/output/exp_mult_obs/plots/qg_multobs.txt
+
+Step 4: Run the data assimilation
+
+Copy and paste the yaml file 3dvar_oneobs_default.yaml:
+
+    cp $JEDI_EDU/qg3Dvar/yamls/3dvar_oneobs_default.yaml $JEDI_EDU/qg3Dvar/yamls/3dvar_mult_obs.yaml
+    ls $JEDI_EDU/qg3Dvar/yamls/
+
+You need to open 3dvar_mult_obs.yaml and modify several values:
+
+-   replace all the occurences of exp_default by exp_mult_obs: this
+    ensures we are using the correct files for background and
+    observations, and aren't overwriting any previous results.
+-   rename exp to 3dvar_mult_obs in output section at the very end of
+    the yaml file (your analysis will be saved as
+    3dvar_mult_obs.an.2009-12-31T00:00:00Z.nc)
+
+and run the 3Dvar:
+
+    cd $JEDI_EDU
+    $JEDI_BIN/qg_4dvar.x ./qg3Dvar/yamls/3dvar_mult_obs.yaml
+
+You can see the results, after thinking about your expectations, via:
+
+    cd $JEDI_EDU/plots_scripts
+    python ./plot.py qg fields \
+            $JEDI_EDU/qg3Dvar/output/exp_mult_obs/da/3dvar_mult_obs.an.2009-12-31T00\:00\:00Z.nc \
+            $JEDI_EDU/qg3Dvar/output/exp_mult_obs/bg/bkgd.fc.2009-12-30T00\:00\:00Z.P1D.nc \
+            --plotwind --output $JEDI_EDU/qg3Dvar/output/exp_mult_obs/plots/3dvar_mult_obs_increment --title "analysis increment"
+
+A few questions to get you going:
+
+-   Can you identify the positions of the observations? If not, why is
+    that so difficult?
+-   Do you expect the increments to be larger or smaller, or similar to
+    the default experiment? Why?
+
+You can also look at the analysis error via:
+
+    cd $JEDI_EDU/plots_scripts
+    python ./plot.py qg fields \
+            $JEDI_EDU/qg3Dvar/output/exp_mult_obs/da/3dvar_mult_obs.an.2009-12-31T00\:00\:00Z.nc \
+            $JEDI_EDU/qg3Dvar/output/truth/truth.fc.2009-12-15T00\:00\:00Z.P16D.nc \
+            --output $JEDI_EDU/qg3Dvar/output/exp_mult_obs/plots/3dvar_mult_obs_analysis_error --title "analysis error"
+
+-   Is the analysis error indeed smaller than the background error?
+-   In every grid point? Or on average?
+
+On the last question, there is an interesting piece of theory in Kalman
+filtering that carries over directly to a 3DVar if the observation
+operator H is linear. From the Kalman filter equations at the beginning
+of this 3DVar exercise we can derive an update equation for the model
+covariance matrix, as: P = (I−KH)B
+
+By writing out that Kalman gain we find:
+P = B − BH^(T)(HBH^(T)+R)^( − 1)HB      so that $ ;;;;;Tr(P) = Tr(B) -
+Tr(BH^T(HBH^T + R)^{-1} HB)$
+
+All three matrices are symmetric positive semi definite, meaning that
+their eigenvalues are non-negative, and the trace is the sum of the
+eigenvalues. We thus see that Tr(P) ≤ Tr(B). Now the trace of a
+covariance matrix is the sum of the diagonal elements, so the sum of the
+variances of all variables in the state vector. Hence, we find that the
+sum of the error variances of the analysis will be lower than that of
+the background error variances. This, then, shows that the average
+absolute value of the analysis errors is expected to be smaller than
+that of the background errors.
+
+This comes feature of the Kalman filter, and hence the 3DVar for linear
+observation operators, can be traced back to its derivation: the Kalman
+filter can be derived as the minimum variance estimator for linear
+problems.
+
+This experiment should have
+
+-   Further increased your skills in using and changing yaml files
+-   Given you a even better understanding of the covariances 3DVar (and
+    in data assimilation in general), leading to an almost full
+    understanding of a 3DVar.
