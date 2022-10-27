@@ -1,0 +1,30 @@
+geometry:
+  nx: 40
+  ny: 20
+  depths: [4000.0, 6000.0]
+initial condition:
+  date: 2009-12-30T00:00:00Z
+  filename: qg4Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P15D.nc
+model:
+  name: QG
+  tstep: PT3H
+forecast length: PT24H
+window begin: 2009-12-30T00:00:00Z
+window length: PT24H
+observations:
+  observers:
+  - obs operator:
+      obs type: Stream
+    obs space:
+      obsdataout:
+        engine:
+          obsfile: qg4Dvar/output/exp_mult/obs/truth.multobs.nc
+      obs type: Stream
+      generate:
+        begin: PT1H
+        nval: 1
+        obs density: 50
+        obs error: 4.0e6
+        obs period: PT3H
+make obs: true
+obs perturbations: true

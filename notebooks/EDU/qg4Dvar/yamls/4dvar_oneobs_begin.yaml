@@ -5,7 +5,7 @@ cost function:
   analysis variables: [x]
   background:
     date: 2009-12-30T00:00:00Z
-    filename: qg4Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00:00:00Z.PT0S.nc
+    filename: qg4Dvar/output/exp_begin/bg/bkgd.fc.2009-12-30T00:00:00Z.PT0S.nc
   background error:
     covariance model: QgError
     horizontal_length_scale: 2.2e6
@@ -19,10 +19,10 @@ cost function:
       obs space:
         obsdatain:
           engine:
-            obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.begin.nc
+            obsfile: qg4Dvar/output/exp_begin/obs/truth.1obs.begin.nc
         obsdataout:
           engine:
-            obsfile: qg4Dvar/output/exp_default/obs/4dvar.1obs.begin.nc
+            obsfile: qg4Dvar/output/exp_begin/obs/4dvar.1obs.begin.nc
         obs type: Stream
       obs error:
         covariance model: diagonal
@@ -52,28 +52,28 @@ variational:
     diagnostics:
       departures: ombg
     test: on
-  # - ninner: 10
-  #   gradient norm reduction: 1.0e-10
-  #   geometry:
-  #     nx: 40
-  #     ny: 20
-  #     depths: [4500.0, 5500.0]
-  #   linear model:
-  #     name: QgTLM
-  #     trajectory:
-  #       tstep: PT1H
-  #     tstep: PT1H
-  #     variable change: Identity
-  #   diagnostics:
-  #     departures: ombg
-  #   test: on
+  - ninner: 10
+    gradient norm reduction: 1.0e-10
+    geometry:
+      nx: 40
+      ny: 20
+      depths: [4500.0, 5500.0]
+    linear model:
+      name: QgTLM
+      trajectory:
+        tstep: PT1H
+      tstep: PT1H
+      variable change: Identity
+    diagnostics:
+      departures: ombg
+    test: on
 final:
   diagnostics:
     departures: oman
   prints:
     frequency: PT1H
 output:
-  datadir: qg4Dvar/output/exp_default/da/
+  datadir: qg4Dvar/output/exp_begin/da/
   exp: 4dvar.1obs.begin
   first: PT0S
   frequency: PT6H

@@ -5,7 +5,7 @@ cost function:
   analysis variables: [x]
   background:
     date: 2009-12-30T00:00:00Z
-    filename: qg4Dvar/output/exp_mid/bg/bkgd.fc.2009-12-30T00:00:00Z.PT0S.nc
+    filename: qg4Dvar/output/exp_mult/bg/bkgd.fc.2009-12-30T00:00:00Z.PT0S.nc
   background error:
     covariance model: QgError
     horizontal_length_scale: 2.2e6
@@ -19,17 +19,17 @@ cost function:
       obs space:
         obsdatain:
           engine:
-            obsfile: qg4Dvar/output/exp_mid/obs/truth.1obs.mid.nc
+            obsfile: qg4Dvar/output/exp_mult/obs/truth.multobs.nc
         obsdataout:
           engine:
-            obsfile: qg4Dvar/output/exp_mid/obs/4dvar.1obs.mid.nc
+            obsfile: qg4Dvar/output/exp_mult/obs/4dvar.multobs.nc
         obs type: Stream
       obs error:
         covariance model: diagonal
   geometry:
     nx: 40
     ny: 20
-    depths: [4500.0, 5500.0]
+    depths: [4000.0, 6000.0]
   model:
     name: QG
     tstep: PT1H
@@ -42,7 +42,7 @@ variational:
     geometry:
       nx: 40
       ny: 20
-      depths: [4500.0, 5500.0]
+      depths: [4000.0, 6000.0]
     linear model:
       name: QgTLM
       trajectory:
@@ -57,7 +57,7 @@ variational:
     geometry:
       nx: 40
       ny: 20
-      depths: [4500.0, 5500.0]
+      depths: [4000.0, 6000.0]
     linear model:
       name: QgTLM
       trajectory:
@@ -70,11 +70,9 @@ variational:
 final:
   diagnostics:
     departures: oman
-  prints:
-    frequency: PT1H
 output:
-  datadir: qg4Dvar/output/exp_mid/da/
-  exp: 4dvar.1obs.mid
+  datadir: qg4Dvar/output/exp_mult/da
+  exp: 4dvar.multobs
   first: PT0S
   frequency: PT6H
   type: an

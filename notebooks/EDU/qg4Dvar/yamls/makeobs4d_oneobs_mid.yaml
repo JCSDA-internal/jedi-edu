@@ -4,7 +4,7 @@ geometry:
   depths: [4000.0, 6000.0]
 initial condition:
   date: 2009-12-30T00:00:00Z
-  filename: qg3Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P15D.nc
+  filename: qg4Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P15D.nc
 model:
   name: QG
   tstep: PT6H
@@ -18,9 +18,8 @@ observations:
     obs space:
       obsdataout:
         engine:
-          obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.mid.nc
+          obsfile: qg4Dvar/output/exp_mid/obs/truth.1obs.mid.nc
       obs type: Stream
-      # obs perturbations seed: 1
       generate:
         begin: PT12H
         nval: 1
@@ -29,6 +28,6 @@ observations:
           lat: [50]                                # List of latitudes for generated observations (only one here)
           z: [7000.0]                              # List of heights for generated observations (only one here)
         obs error: 4.0e6                           # Observation error standard deviation, in m^2/s
-        obs period: PT50H
+        obs period: PT24H
 make obs: true                                     # Generate the observations
 obs perturbations: true                            # Add random  measurements to the observations

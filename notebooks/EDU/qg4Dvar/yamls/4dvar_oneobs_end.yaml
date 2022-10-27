@@ -5,7 +5,7 @@ cost function:
   analysis variables: [x]
   background:
     date: 2009-12-30T00:00:00Z
-    filename: qg4Dvar/output/exp_default/bg/bkgd.fc.2009-12-30T00:00:00Z.PT0S.nc
+    filename: qg4Dvar/output/exp_end/bg/bkgd.fc.2009-12-30T00:00:00Z.PT0S.nc
   background error:
     covariance model: QgError
     horizontal_length_scale: 2.2e6
@@ -19,10 +19,10 @@ cost function:
       obs space:
         obsdatain:
           engine:
-            obsfile: qg4Dvar/output/exp_default/obs/truth.1obs.end.nc
+            obsfile: qg4Dvar/output/exp_end/obs/truth.1obs.end.nc
         obsdataout:
           engine:
-            obsfile: qg4Dvar/output/exp_default/obs/4dvar.1obs.end.nc
+            obsfile: qg4Dvar/output/exp_end/obs/4dvar.1obs.end.nc
         obs type: Stream
       obs error:
         covariance model: diagonal
@@ -73,7 +73,7 @@ final:
   prints:
     frequency: PT1H
 output:
-  datadir: qg4Dvar/output/exp_default/da/
+  datadir: qg4Dvar/output/exp_end/da/
   exp: 4dvar.1obs.end
   first: PT0S
   frequency: PT6H
