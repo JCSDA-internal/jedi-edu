@@ -1,0 +1,33 @@
+geometry:
+  nx: 40
+  ny: 20
+  depths: [4000.0, 6000.0]
+initial condition:
+  date: 2009-12-30T00:00:00Z
+  filename: qg4Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P15D.nc
+model:
+  name: QG
+  tstep: PT6H
+forecast length: PT24H
+window begin: 2009-12-30T00:00:00Z
+window length: PT24H
+observations:
+  observers:
+  - obs operator:
+      obs type: Stream                             # The observation type is the stream function
+    obs space:
+      obsdataout:
+        engine:
+          obsfile: qg4Dvar/output/exp_begin/obs/truth.1obs.begin.nc
+      obs type: Stream
+      generate:
+        begin: PT1H
+        nval: 1
+        obs locations:
+          lon: [25]                                # List of longitudes for generated observations (only one here)
+          lat: [50]                                # List of latitudes for generated observations (only one here)
+          z: [7000.0]                              # List of heights for generated observations (only one here)
+        obs error: 4.0e6                           # Observation error standard deviation, in m^2/s
+        obs period: PT24H
+make obs: true                                     # Generate the observations
+obs perturbations: true                            # Add random  measurements to the observations

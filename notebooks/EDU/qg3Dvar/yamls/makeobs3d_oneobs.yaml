@@ -1,0 +1,29 @@
+geometry:
+  nx: 40
+  ny: 20
+  depths: [4000.0, 6000.0]
+state:
+  date: 2009-12-31T00:00:00Z
+  filename: qg3Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P16D.nc
+window begin: 2009-12-30T18:00:00Z
+window length: PT12H
+observations:
+  observers:
+  - obs operator:
+      obs type: Stream                             # The observation type is the stream function
+    obs space:
+      obsdataout:
+        engine:
+          obsfile: qg3Dvar/output/exp_default/obs/truth.obs3d.nc
+      obs type: Stream
+      generate:
+        begin: PT6H
+        nval: 1
+        obs locations:
+          lon: [-10]                               # List of longitudes for generated observations (only one here)
+          lat: [35]                                # List of latitudes for generated observations (only one here)
+          z: [7000.0]                              # List of heights for generated observations (only one here)
+        obs error: 4.0e6                           # Observation error standard deviation, in m^2/s
+        obs period: PT12H
+make obs: true                                     # Generate the observations
+obs perturbations: true                            # Add random  measurements to the observations

@@ -1,0 +1,78 @@
+cost function:
+  cost type: 4D-Var
+  window begin: 2009-12-30T00:00:00Z
+  window length: PT24H
+  analysis variables: [x]
+  background:
+    date: 2009-12-30T00:00:00Z
+    filename: qg4Dvar/output/exp_mult/bg/bkgd.fc.2009-12-30T00:00:00Z.PT0S.nc
+  background error:
+    covariance model: QgError
+    horizontal_length_scale: 2.2e6
+    maximum_condition_number: 1.0e6
+    standard_deviation: 1.8e7
+    vertical_length_scale: 15000.0
+  observations:
+    observers:
+    - obs operator:
+        obs type: Stream
+      obs space:
+        obsdatain:
+          engine:
+            obsfile: qg4Dvar/output/exp_mult/obs/truth.multobs.nc
+        obsdataout:
+          engine:
+            obsfile: qg4Dvar/output/exp_mult/obs/4dvar.multobs.nc
+        obs type: Stream
+      obs error:
+        covariance model: diagonal
+  geometry:
+    nx: 40
+    ny: 20
+    depths: [4000.0, 6000.0]
+  model:
+    name: QG
+    tstep: PT1H
+variational:
+  minimizer:
+    algorithm: DRPLanczos
+  iterations:
+  - ninner: 10
+    gradient norm reduction: 1.0e-10
+    geometry:
+      nx: 40
+      ny: 20
+      depths: [4000.0, 6000.0]
+    linear model:
+      name: QgTLM
+      trajectory:
+        tstep: PT1H
+      tstep: PT1H
+      variable change: Identity
+    diagnostics:
+      departures: ombg
+    test: on
+  - ninner: 10
+    gradient norm reduction: 1.0e-10
+    geometry:
+      nx: 40
+      ny: 20
+      depths: [4000.0, 6000.0]
+    linear model:
+      name: QgTLM
+      trajectory:
+        tstep: PT1H
+      tstep: PT1H
+      variable change: Identity
+    diagnostics:
+      departures: ombg
+    test: on
+final:
+  diagnostics:
+    departures: oman
+output:
+  datadir: qg4Dvar/output/exp_mult/da
+  exp: 4dvar.multobs
+  first: PT0S
+  frequency: PT6H
+  type: an

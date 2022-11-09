@@ -1,0 +1,26 @@
+background error:
+  covariance model: QgError                         # Use the pre-defined QG error model
+  horizontal_length_scale: 2.2e6                    # Horizontal correlation scale in m
+  maximum_condition_number: 1.0e6
+  standard_deviation: 1.8e7                         # Standard deviation in m^2/s
+  vertical_length_scale: 15000.0                    # Vertical correlation lengthscale in m
+  randomization_seed: 3                             # Random seed
+forecast length: PT24H                              # forecast for one day
+initial condition:
+  date: 2009-12-31T00:00:00Z
+  filename: qg3Dvar/output/truth/truth.fc.2009-12-15T00:00:00Z.P15D.nc
+members: 1                                          # Generate one perturbed state from the truth
+model:
+  name: QG
+  tstep: PT1H
+output:
+  datadir: qg3Dvar/output/exp_default/bg
+  date: 2009-12-30T00:00:00Z
+  exp: bkgd
+  frequency: PT3H
+  type: fc
+geometry:
+  nx: 40
+  ny: 20
+  depths: [4000.0, 6000.0]
+perturbed variables: [x]                            # Perturb the whole state vector x

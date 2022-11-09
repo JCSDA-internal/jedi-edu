@@ -1,5 +1,6 @@
 # This file tells git that it should not track certain files.
 
+*__pycache__
 *.swp
 *~
 *.DS_Store
@@ -8,5 +9,12 @@
 *.ipython
 *.jupyter
 *.local
-
 *.viminfo
+*cpython-38.pyc
+
+*.cache
+*.config
+*.bash_history
+
+*.jpg
+*.nc
