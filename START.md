@@ -13,7 +13,8 @@ Open a terminal window and clone the jedi-edu repository.
 ```
 git clone https://github.com/JCSDA-internal/jedi-edu.git
 ```
-Checkout the qg_tutorial branch:
+
+Enter the jedi-edu repository:
 ```
 cd jedi-edu
 ```
@@ -26,7 +27,7 @@ docker run -it --rm -p 9999:8888 -v <your>/<path>/<to>/jedi-edu/notebooks/:/home
 ```
 The next time you want to enter the container, you will only need to enter the `docker run` command.
 
-You will see a message resembling:
+If it worked, you will see a message resembling:
 ```
 check start
 
@@ -44,7 +45,7 @@ Open your favorite browser and go to `localhost:9999`
 All that follows is done **in the container ON THE WEBPAGE you just opened**.
 
 ### Open the qg 3dvar tutorial
-On the left of the web page there is a tree of files, click on the little folder icon if you aren't on it already, and double click on `qg3Dvar_tutorial.ipynb`.
+On the left of the web page there is a tree of files. Click on the little folder icon if you aren't on it already (open the one called `shared/`), and double click on `qg3Dvar_tutorial.ipynb`.
 
 Note that in this file, you will be able to run commands by clicking on the cell that contains it and click the `play` button.
 ![welcome](img/run_command.png)
